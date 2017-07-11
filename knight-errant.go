@@ -3,7 +3,7 @@ package main
 import(
   "html/template"
   "net/http"
-  "fmt"
+  "encoding/json"
 )
 
 const (
@@ -11,6 +11,10 @@ const (
   boardHeight = 8
   numSquares = 64
 )
+
+type ResponseObject struct {
+	Response [boardWidth][boardHeight]int `json:"response"`
+}
 
 func renderTemplate(w http.ResponseWriter, tmpl string, varMap interface{}) {
   t, _ := template.ParseFiles(tmpl + ".html")
@@ -43,10 +47,17 @@ func moveKnight(w http.ResponseWriter, board [boardWidth][boardHeight]int, visit
   board[x][y] = visitedSquareCount
 
   if visitedSquareCount == numSquares {
-    varMap := map[string]interface{}{
-      "answer": board,
+    ro := &ResponseObject{}
+    ro.Response = board
+
+    json, err := json.Marshal(ro)
+    if err != nil {
+      // log error
     }
-    renderTemplate(w, "root", varMap)
+
+    w.Header().Set("Content-Type", "application/json")
+    w.Write(json)
+
     return true
   }
 

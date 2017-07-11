@@ -1,3 +1,84 @@
-<h1>Welcome to the Knight's Travails</h1>
-<a href="/calculate">Calculate</a>
-<div>{{.answer}}</div>
+<style type="text/css">
+  table {
+    border: 3px solid black;
+  }
+  .black {
+    font-size: 30px;
+    color: transparent;
+    text-align: center;
+    background: black;
+    width: 80px;
+    height: 80px;
+    display: block;
+  }
+
+  .white {
+    width: 80px;
+    height: 80px;
+    font-size: 30px;
+    color: transparent;
+    text-align: center;
+  }
+</style>
+<body>
+  <h1>A Knight's Tour in Go</h1>
+  <button id="calculate">Calculate</button>
+</body>
+
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    var calculateButton = document.getElementById("calculate");
+    calculateButton.addEventListener("click", function() {
+      var request = new XMLHttpRequest();
+      request.open('POST', "/calculate", true);
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+          var answer = JSON.parse(request.response).response;
+          createAnswerHash(answer)
+        }
+      };
+      request.send();
+    });
+  });
+
+  var table = document.createElement("table");
+  for (var i = 0; i < 8; i++) {
+      var tr = document.createElement('tr');
+      for (var j = 0; j < 8; j++) {
+          var td = document.createElement('td');
+          td.innerHTML = "0"
+          td.id = "" + i + "" + j
+          if (i % 2 == j % 2) {
+              td.className = "white";
+          } else {
+              td.className = "black";
+          }
+          tr.appendChild(td);
+      }
+      table.appendChild(tr);
+  }
+  document.body.appendChild(table);
+
+  var createAnswerHash = function(answer) {
+    answerHash = {}
+    for (i = 0; i < answer.length; i++) {
+      for (j = 0; j < answer[i].length; j++) {
+        var id = i.toString() + j.toString()
+        square = document.getElementById(id)
+        answerHash[answer[i][j]] = square
+      }
+    }
+    displayAnswer(answerHash, 1)
+  }
+
+  var displayAnswer = function(answerHash, idx) {
+    setTimeout(function() {
+      console.log(answerHash[idx]);
+      answerHash[idx].innerHTML = idx
+      answerHash[idx].style.color = "blue"
+      idx ++
+      displayAnswer(answerHash, idx)
+    }, 350)
+  }
+</script>
