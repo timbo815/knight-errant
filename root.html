@@ -31,15 +31,25 @@
     var calculateButton = document.getElementById("calculate");
     calculateButton.addEventListener("click", function() {
       var request = new XMLHttpRequest();
-      request.open('POST', "/calculate", true);
+      request.open('POST', "/calculate/" + window.selectedSquare, true);
       request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
           var answer = JSON.parse(request.response).response;
           createAnswerHash(answer)
+        } else {
+          console.log(request.response)
         }
       };
       request.send();
     });
+
+    var squares = document.getElementsByTagName("td");
+    Array.prototype.forEach.call(squares, (function(square) {
+      square.addEventListener("click", function() {
+        window.selectedSquare = square.id
+        console.log(window.selectedSquare);
+      })
+    }));
   });
 
   var table = document.createElement("table");
@@ -79,6 +89,6 @@
       answerHash[idx].style.color = "blue"
       idx ++
       displayAnswer(answerHash, idx)
-    }, 350)
+    }, 500)
   }
 </script>

@@ -4,6 +4,8 @@ import(
   "html/template"
   "net/http"
   "encoding/json"
+  "fmt"
+  "strconv"
 )
 
 const (
@@ -11,6 +13,7 @@ const (
   boardHeight = 8
   numSquares = 64
 )
+
 
 type ResponseObject struct {
 	Response [boardWidth][boardHeight]int `json:"response"`
@@ -29,9 +32,20 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func calculateHandler(w http.ResponseWriter, r *http.Request) {
+  incomingX := r.URL.Path[11:12]
+  incomingY := r.URL.Path[12:]
+
+  startingX, err := strconv.Atoi(incomingX)
+  startingY, err := strconv.Atoi(incomingY)
+
+  if err != nil {
+    fmt.Println(err)
+  }
+  // startingCoords := m[square]
+
   var board [boardWidth][boardHeight]int
   var visitedSquareCount int
-  moveKnight(w, board, visitedSquareCount, 3, 4)
+  moveKnight(w, board, visitedSquareCount, startingX, startingY)
 }
 
 func moveKnight(w http.ResponseWriter, board [boardWidth][boardHeight]int, visitedSquareCount int, x int, y int) bool {
@@ -47,12 +61,14 @@ func moveKnight(w http.ResponseWriter, board [boardWidth][boardHeight]int, visit
   board[x][y] = visitedSquareCount
 
   if visitedSquareCount == numSquares {
+    fmt.Println("finished")
+    fmt.Println(board)
     ro := &ResponseObject{}
     ro.Response = board
 
     json, err := json.Marshal(ro)
     if err != nil {
-      // log error
+      fmt.Println(err)
     }
 
     w.Header().Set("Content-Type", "application/json")
